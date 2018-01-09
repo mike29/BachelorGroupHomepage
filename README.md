@@ -1,0 +1,2 @@
+# bachelorGruppeSide
+Bachelor group homepage 
