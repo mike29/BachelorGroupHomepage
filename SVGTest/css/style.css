@@ -1,0 +1,88 @@
+#imgDiv {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: -1;
+}
+
+
+#selectType {
+    z-index: 1;
+    position: absolute;
+    left: 800px;
+    top: 80px;
+}
+
+#deleteAll {
+    z-index: 1;
+    position: absolute;
+    left: 800px;
+}
+
+#undo {
+    z-index: 1;
+    position: absolute;
+    left: 800px;
+    top: 40px;
+}
+
+#status {
+    position: absolute;
+    z-index: 1;
+    top: 160px;
+    left: 800px;
+}
+
+#fillEnabled {
+    position: absolute;
+    z-index: 1;
+    top: 140px;
+    left: 800px;
+}
+
+#SvgjsSvg1001 {
+    width: 650px;
+    height: 800px;
+}
+
+#selectSize {
+    z-index: 1;
+    position: absolute;
+    left: 800px;
+    top: 100px;
+}
+
+#selectColor {
+    z-index: 1;
+    position: absolute;
+    left: 800px;
+    top: 120px;
+}
+
+#type {
+    position: absolute;
+    z-index: 1;
+    left: 760px;
+    top: 65px;
+}
+
+#size {
+    position: absolute;
+    z-index: 1;
+    left: 760px;
+    top: 85px;
+}
+
+#color {
+    position: absolute;
+    z-index: 1;
+    left: 760px;
+    top: 105px;
+}
+
+#fill {
+    position: absolute;
+    z-index: 1;
+    left: 760px;
+    top: 125px;
+}

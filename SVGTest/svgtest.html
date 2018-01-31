@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test av SVG</title>
+    <script src="js/svg.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/svgMap.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+    <div id="imgDiv"></div>
+    <select title="Object type" id="selectType">
+        <option value="0">Circle</option>
+        <option value="1">Square</option>
+        <option value="2">Ellipse</option>
+        <option value="3">Line</option>
+        <option value="4">Double Circle</option>
+        <option value="5">Triangle</option>
+    </select>
+    <select title="size" id="selectSize">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20" selected>20</option>
+        <option value="25">25</option>
+        <option value="30">30</option>
+        <option value="35">35</option>
+        <option value="40">40</option>
+    </select>
+    <select title="color" id="selectColor">
+        <option value="#DC143C">Red</option>
+        <option value="#1E90FF">Blue</option>
+        <option value="#7CFC00">Green</option>
+        <option value="#8A2BE2">Purple</option>
+        <option value="#FFD700">Yellow</option>
+        <option value="#000000">Black</option>
+        <option value="#FF7F50">Orange</option>
+        <option value="#F0F8FF">Gray</option>
+        <option value="#FFFAF0">White</option>
+        <option value="#FF1493">Pink</option>
+        <option value="#D2691E">Brown</option>
+    </select>
+    <select title="fill" id="fillEnabled">
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+    </select>
+    <button id="deleteAll">Delete all</button>
+    <button id="undo">Delete last</button>
+    <p id="type">Type</p>
+    <p id="size">Size</p>
+    <p id="color">Color</p>
+    <p id="fill">Fill</p>
+    <div id="svgCanvas"></div>
+
+    <p id="status">Wait for it</p>
+</body>
+<script>
+    //Temporary "clicked element" print
+    $(window).click(function(e) {
+        var x = e.clientX, y = e.clientY,
+            elementMouseIsOver = document.elementFromPoint(x, y).id;
+        return document.getElementById('status').innerHTML = elementMouseIsOver;
+    });
+</script>
+<script type="text/javascript">
+
+    /**
+     * Global variables for selection
+     */
+    var size;
+    var color;
+    var selectedType;
+    var x1, y1;
+    var click = 0;
+    var fillEnabled;
+    var fillString;
+    var drawObject;
+
+    var data = [];
+    var newSvgElement = {};
+
+    /**
+     * Creates the SVG layout
+     */
+    var draw = new SVG('svgCanvas').size(600,900);
+    var group = draw.group().addClass('overlay');
+
+    /**
+     * Retrieves mouse position and pushes object settings into the data array
+     */
+    $('#svgCanvas').click(function(e){
+        //var x = e.pageX - this.offsetLeft;
+        //var y = e.pageY - this.offsetTop;
+        var xx = e.clientX - this.offsetLeft, yy = e.clientY - this.offsetTop,
+            elementMouseIsOver = document.elementFromPoint(xx, yy).id;
+        fillString = document.getElementById("fillEnabled").value;
+        fillEnabled = (fillString === 'true');
+
+        //create a new element if element clicked is the svg canvas
+        if(elementMouseIsOver === "SvgjsSvg1001") {
+            var rand = Math.floor(Math.random() * 100000000); // ( ͡° ͜ʖ ͡°)
+
+            switch (parseInt(document.getElementById("selectType").value)) {
+                case 3:
+                    if (click === 0) {
+                        newSvgElement.size = parseInt(document.getElementById("selectSize").value);
+                        newSvgElement.type = parseInt(document.getElementById("selectType").value);
+                        newSvgElement.fill = true;
+                        newSvgElement.color = document.getElementById('selectColor').value;
+                        newSvgElement.id = 'svgElement' + rand;
+                        newSvgElement.position = [xx,yy];
+                        click = 1;
+                    } else if (click === 1) {
+                        newSvgElement.position.push(xx);
+                        newSvgElement.position.push(yy);
+                        data.push( Object.assign({}, newSvgElement) );
+                        click = 0;
+                    }
+
+                    break;
+
+                default:
+                    newSvgElement.size = parseInt(document.getElementById("selectSize").value);
+                    newSvgElement.type = parseInt(document.getElementById("selectType").value);
+                    newSvgElement.fill =  fillEnabled;
+                    newSvgElement.color = document.getElementById('selectColor').value;
+                    newSvgElement.id = 'svgElement' + rand;
+                    newSvgElement.position = [xx,yy];
+                    data.push( Object.assign({}, newSvgElement) );
+
+                    break;
+            }
+
+            // drawPoint(x,y);
+        } else if (elementMouseIsOver === 'svgCanvas'){
+            //do nothing, because we don't want to remove this svg element, nor do we want to draw on it
+        }
+        //delete the selected element if an element is selected
+        else {
+            deleteSvgFromPoint(elementMouseIsOver);
+        }
+
+        update();
+    });
+
+    /**
+     * Updates canvas based on data-array
+     */
+    function update(){
+        $("#SvgjsG1008").empty();
+
+        for (var i = 0; i < data.length; i++) {
+            drawPoint(data[i]);
+        }
+    }
+
+    function deleteSvgFromPoint(id){
+        if (data.length) {
+            var elementIdx = data.map(function (element) {
+                return element.id
+            }).indexOf(id);
+
+            if (elementIdx > -1) {
+                data.splice(elementIdx, 1);
+            }
+        }
+    }
+    /**
+     * Draws an SVG element at mouse position based on user selection
+     */
+    function drawPoint(svgObject){
+        //Retrieve values from the data array elements, and store them in the variables
+        size            = svgObject.size;
+        selectedType    = svgObject.type;
+        color           = svgObject.color;
+        fillEnabled     = svgObject.fill;
+
+        // gross
+        var xx          = svgObject.position[0];
+        var yy          = svgObject.position[1];
+
+        fillString = 'none';
+        if (fillEnabled){
+            fillString = color;
+        }
+        //switch case based on the user selected object (could be case: "circle" if you'd want to work with strings)
+        switch(selectedType){
+            case 0:
+                //This creates a circle
+                drawObject = group.circle(size).id(svgObject.id).addClass('circle');
+                drawObject.attr({
+                    fill: fillString,
+                    stroke: color,
+                    'stroke-width': size/10,
+                    cx: xx,
+                    cy: yy
+                });
+
+                break;
+
+            case 1:
+                //This creates an rectangle
+                drawObject = group.rect(size,size).id(svgObject.id).addClass('rect');
+                drawObject.style({
+                    height: size,
+                    width: size
+                });
+                drawObject.attr({
+                    fill: fillString,
+                    stroke: color,
+                    'stroke-width': size/10,
+                    x: xx - (size / 2),
+                    y: yy - (size / 2)
+                });
+
+                break;
+
+            case 2:
+                //This creates an ellipse
+                drawObject = group.ellipse(size*2,size).id(svgObject.id).addClass('ellipse');
+                drawObject.attr({
+                    fill: fillString,
+                    stroke: color,
+                    'stroke-width': size/10,
+                    cx: xx,
+                    cy: yy
+                });
+
+                break;
+
+            case 3:
+                var x1 = svgObject.position[2];
+                var x2 = svgObject.position[0];
+                var y1 = svgObject.position[3];
+                var y2 = svgObject.position[1];
+                drawObject = group.line(x1,y1,x2,y2).id(svgObject.id).stroke({
+                    width: size/5,
+                    color: color,
+                    linecap: 'round'
+                });
+
+                break;
+
+            case 4:
+                //This is to create the goal symbol, which is a circle within another circle, both of which has no fill
+                drawObject = group.circle(size).id(svgObject.id).addClass('goal');
+                drawObject.attr({
+                    fill: 'none',
+                    stroke: color,
+                    'stroke-width': size/10,
+                    cx: xx,
+                    cy: yy
+                });
+                drawObject = group.circle(size/2).id(svgObject.id).addClass('goal');
+                drawObject.attr({
+                    fill: 'none',
+                    stroke: color,
+                    'stroke-width': size/10,
+                    cx: xx,
+                    cy: yy
+                });
+
+                break;
+
+            case 5:
+                //This creates a triangle facing up. The path string uses the mouse coordinates and adjusts depending on
+                //size selected by the user. To face the triangle the other way, simply change the + and - signs
+                //on all the parenthesis calculations
+                size = size/2;
+                drawObject = group.path('M' + (xx + size) + " " + (yy + size) + " L" + (xx - size) + " " + (yy + size)
+                    + " L" + xx + " " + (yy - size) + ' Z').id(svgObject.id);
+                drawObject.attr({
+                    fill: fillString,
+                    stroke: color,
+                    'stroke-width': size/5
+                });
+
+                break;
+
+        }
+        return null;
+    }
+
+    /**
+     * Delete all the objects created by the user. This is done by simply emptying the tag that's initially created
+     * by SVG.js. If they change their naming conventions in an update, just rename it to whatever the new tag is called
+     */
+    $('#deleteAll').click(function(){
+        data = [];
+        update();
+    });
+
+    /**
+     * Undo creation of the last object. This simply removes the last object added to the svg group. We should probably
+     * change this to a more ordinary "undo" function that undo's whatever the last action done by the user (recreate
+     * deleted elements etc.)
+     */
+    $('#undo').click(function(){
+        var removed = data.splice(data.length - 1, 1);
+        console.log('removed ', removed, data);
+        update();
+    });
+</script>
+</html>
